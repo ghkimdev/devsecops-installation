@@ -1,0 +1,86 @@
+---
+- name: Install Nexus3
+  hosts: nexus
+  become: true
+
+  vars:
+    nexus_version: 3.74.0-05
+
+  tasks:
+  - name: Download Nexus
+    ansible.builtin.get_url:
+      url: https://download.sonatype.com/nexus/3/nexus-{{ nexus_version }}-unix.tar.gz
+      dest: /opt/nexus.tar.gz
+
+  - name: Extract nexus.tar.gz into /opt/nexus
+    ansible.builtin.unarchive:
+      src: /opt/nexus.tar.gz
+      dest: /opt
+      remote_src: yes
+
+  - name: Check if target directory exists
+    stat:
+      path: /opt/nexus
+    register: nexus_target
+ 
+  - name: Rename Nexus directory
+    command: mv /opt/nexus-{{ nexus_version }} /opt/nexus
+    when: not nexus_target.stat.exists
+
+  - name: Ensure run_as_user is set to nexus
+    ansible.builtin.lineinfile:
+      path: /opt/nexus/bin/nexus.rc
+      regexp: '^#run_as_user='
+      line: run_as_user="nexus"
+
+  - name: Ensure group "nexus" exists
+    ansible.builtin.group:
+      name: nexus
+      state: present
+
+  - name: Create a user 'nexus' without a home directory
+    ansible.builtin.user:
+      name: nexus
+      group: nexus
+      create_home: no
+
+  - name: Change /opt/nexus ownership and group
+    ansible.builtin.file:
+      path: /opt/nexus
+      owner: nexus
+      group: nexus
+      recurse: yes
+
+  - name: Change /opt/sonatype-work ownership and group
+    ansible.builtin.file:
+      path: /opt/sonatype-work
+      owner: nexus
+      group: nexus
+      recurse: yes
+
+  - name: Create nexus systemd service
+    ansible.builtin.copy:
+      dest: /etc/systemd/system/nexus.service
+      content: |
+        [Unit]
+        Description=nexus service
+        After=network.target
+
+        [Service]
+        Type=forking
+        LimitNOFILE=65536
+        User=nexus
+        Group=nexus
+        ExecStart=/opt/nexus/bin/nexus start
+        ExecStop=/opt/nexus/bin/nexus stop
+        User=nexus
+        Restart=on-abort
+        TimeoutSec=600
+        [Install]
+        WantedBy=multi-user.target
+
+  - name: enable and start nexus
+    ansible.builtin.service:
+      name: nexus
+      enabled: true
+      state: started

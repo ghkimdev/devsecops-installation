@@ -1,0 +1,153 @@
+---
+- name: Install and configure Nginx with SSL for Jenkins, SonarQube, and Nexus
+  hosts: all
+  become: yes
+  vars:
+    jenkins_domain: "jenkins.gh-devops.site"
+    sonarqube_domain: "sonarqube.gh-devops.site"
+    nexus_domain: "nexus.gh-devops.site"
+    email: "ghkim.dev@gmail.com"
+
+  tasks:
+    - name: Install nginx (only on Jenkins, SonarQube, and Nexus hosts)
+      apt:
+        name: ["nginx", "certbot", "python3-certbot-nginx"]
+        state: present
+        update_cache: yes
+      when: inventory_hostname in ['jenkins', 'nexus', 'sonarqube']
+
+    - name: Remove default site configurations
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/nginx/sites-enabled/default
+        - /etc/nginx/sites-available/default
+      when: inventory_hostname in ['jenkins', 'nexus', 'sonarqube']
+
+    - name: Configure nginx for Jenkins
+      copy:
+        dest: /etc/nginx/sites-available/jenkins.gh-devops.site
+        content: |
+          upstream jenkins{
+              server 127.0.0.1:8080;
+          }
+
+          server{
+              listen      80;
+              server_name {{ jenkins_domain }};
+
+              access_log  /var/log/nginx/jenkins.access.log;
+              error_log   /var/log/nginx/jenkins.error.log;
+
+              proxy_buffers 16 64k;
+              proxy_buffer_size 128k;
+
+              location / {
+                  proxy_pass  http://jenkins;
+                  proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+                  proxy_redirect off;
+
+                  proxy_set_header    Host            $host;
+                  proxy_set_header    X-Real-IP       $remote_addr;
+                  proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header    X-Forwarded-Proto https;
+              }
+          }
+      when: inventory_hostname == 'jenkins'
+
+    - name: Configure nginx for Nexus
+      copy:
+        dest: /etc/nginx/sites-available/nexus.gh-devops.site
+        content: |
+          server {
+              listen   *:80;
+              server_name  {{ nexus_domain }};
+
+              # allow large uploads of files - refer to nginx documentation
+              client_max_body_size 1G;
+
+              location / {
+                  proxy_pass http://127.0.0.1:8081;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              }
+          }
+      when: inventory_hostname == 'nexus'
+
+    - name: Configure nginx for SonarQube
+      copy:
+        dest: /etc/nginx/sites-available/sonarqube.gh-devops.site
+        content: |
+          server {
+              listen 80;
+              server_name {{ sonarqube_domain }};
+              access_log /var/log/nginx/sonar.access.log;
+              error_log /var/log/nginx/sonar.error.log;
+              proxy_buffers 16 64k;
+              proxy_buffer_size 128k;
+
+              location / {
+                  proxy_pass http://127.0.0.1:9000;
+                  proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+                  proxy_redirect off;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto http;
+              }
+          }
+      when: inventory_hostname == 'sonarqube'
+
+    - name: Enable nginx site configuration for Jenkins
+      file:
+        src: /etc/nginx/sites-available/jenkins.gh-devops.site
+        dest: /etc/nginx/sites-enabled/jenkins.gh-devops.site
+        state: link
+      when: inventory_hostname == 'jenkins'
+      
+    - name: Enable nginx site configuration for Nexus
+      file:
+        src: /etc/nginx/sites-available/nexus.gh-devops.site
+        dest: /etc/nginx/sites-enabled/nexus.gh-devops.site
+        state: link
+      when: inventory_hostname == 'nexus'
+
+    - name: Enable nginx site configuration for SonarQube
+      file:
+        src: /etc/nginx/sites-available/sonarqube.gh-devops.site
+        dest: /etc/nginx/sites-enabled/sonarqube.gh-devops.site
+        state: link
+      when: inventory_hostname == 'sonarqube'
+
+    - name: Restart nginx
+      systemd:
+        name: nginx
+        state: restarted
+      when: inventory_hostname in ['jenkins', 'nexus', 'sonarqube']
+
+    - name: Obtain SSL certificate for Jenkins domain
+      command: certbot --nginx -d {{ jenkins_domain }} --staging --non-interactive --agree-tos --email {{ email }}
+      register: certbot_result
+      failed_when: "'Congratulations' not in certbot_result.stdout"
+      retries: 3
+      delay: 10
+      when: inventory_hostname == 'jenkins'
+
+    - name: Obtain SSL certificate for Nexus domain
+      command: certbot --nginx -d {{ nexus_domain }} --staging --non-interactive --agree-tos --email {{ email }}
+      register: certbot_result
+      failed_when: "'Congratulations' not in certbot_result.stdout"
+      retries: 3
+      delay: 10
+      when: inventory_hostname == 'nexus'
+
+    - name: Obtain SSL certificate for SonarQube domain
+      command: certbot --nginx -d {{ sonarqube_domain }} --staging --non-interactive --agree-tos --email {{ email }}
+      register: certbot_result
+      failed_when: "'Congratulations' not in certbot_result.stdout"
+      retries: 3
+      delay: 10
+      when: inventory_hostname == 'sonarqube'
+

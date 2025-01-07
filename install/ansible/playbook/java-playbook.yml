@@ -1,0 +1,33 @@
+- name: Install JAVA
+  hosts: all
+  become: true
+
+  tasks:
+  - name: Update package cache
+    ansible.builtin.apt:
+      update_cache: yes
+
+  - name: Install wget apt-transport-https gpg
+    ansible.builtin.apt:
+      name: [ "wget", "apt-transport-https", "gpg"]
+      state: present
+
+  - name: Add temurin-17-jdk Apt signing key, uses whichever key is at the URL
+    ansible.builtin.apt_key:
+      url: https://packages.adoptium.net/artifactory/api/gpg/key/public
+      state: present
+
+  - name: Add temurin-17-jdk repository into sources list
+    ansible.builtin.apt_repository:
+      repo: deb https://packages.adoptium.net/artifactory/deb {{ ansible_distribution_release }} main
+      state: present
+
+  - name: Update package cache
+    ansible.builtin.apt:
+      update_cache: yes
+
+  - name: Install temurin-17-jdk
+    ansible.builtin.apt:
+      name: temurin-17-jdk
+      state: present
+

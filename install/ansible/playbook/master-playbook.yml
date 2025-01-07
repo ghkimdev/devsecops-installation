@@ -1,0 +1,26 @@
+---
+- name: Master Playbook
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Playbook Start
+      debug:
+        msg: "PLAYBOOK START"
+
+- import_playbook: java-playbook.yml
+
+- import_playbook: jenkins-playbook.yml
+
+- import_playbook: trivy-playbook.yml
+
+- import_playbook: docker-playbook.yml
+
+- import_playbook: nexus-playbook.yml
+
+- import_playbook: postgresql-playbook.yml
+
+- import_playbook: sonarqube-playbook.yml
+
+- import_playbook: ssl-playbook.yml
+

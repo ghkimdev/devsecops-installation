@@ -1,0 +1,34 @@
+---
+- name: Install Trivy
+  hosts: jenkins
+  become: true
+
+  tasks:
+  - name: Update package cache
+    ansible.builtin.apt:
+      update_cache: yes
+
+  - name: Install wget apt-transport-https gnupg lsb-release
+    ansible.builtin.apt:
+      name: [ "wget", "apt-transport-https", "gnupg", "lsb-release"]
+      state: present
+
+  - name: Add trivy Apt signing key, uses whichever key is at the URL
+    ansible.builtin.apt_key:
+      url: https://aquasecurity.github.io/trivy-repo/deb/public.key
+      state: present
+
+  - name: Add trivy repository into sources list
+    ansible.builtin.apt_repository:
+      repo: deb https://aquasecurity.github.io/trivy-repo/deb {{ ansible_distribution_release }} main
+      state: present
+
+  - name: Update package cache
+    ansible.builtin.apt:
+      update_cache: yes
+
+  - name: Install trivy
+    ansible.builtin.apt:
+      name: trivy
+      state: present
+

@@ -1,0 +1,111 @@
+---
+- name: Install Sonarqube
+  hosts: sonarqube
+  become: true
+
+  vars_files:
+  - vars/sonar_db_credentials.yml
+
+  vars:
+    sonarqube_version: 10.7.0.96327
+
+  tasks:
+  - name: Install unzip
+    ansible.builtin.apt:
+      name: unzip
+      state: present
+
+  - name: Create file /etc/sysctl.d/99-sonarqube.conf
+    ansible.builtin.copy:
+      dest: /etc/sysctl.d/99-sonarqube.conf
+      content: |
+        vm.max_map_count=524288
+        fs.file-max=131072
+
+  - name: Create file /etc/security/limits.d/99-sonarqube.conf
+    ansible.builtin.copy:
+      dest: /etc/security/limits.d/99-sonarqube.conf
+      content: |
+        sonarqube   -   nofile   131072
+        sonarqube   -   nproc    8192
+
+  - name: Apply all sysctl settings
+    ansible.builtin.command:
+      cmd: sysctl --system
+
+  - name: Download Sonarqube
+    ansible.builtin.get_url:
+      url: https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonarqube_version }}.zip
+      dest: /opt/sonarqube.zip
+
+  - name: Extract /opt/sonarqube.zip into /opt/sonarqube
+    ansible.builtin.unarchive:
+      src: /opt/sonarqube.zip
+      dest: /opt
+      remote_src: yes
+
+  - name: Check if target directory exists
+    stat:
+      path: /opt/sonarqube
+    register: sonarqube_target
+
+  - name: Rename Sonarqube directory
+    command: mv /opt/sonarqube-{{ sonarqube_version }} /opt/sonarqube
+    when: not sonarqube_target.stat.exists
+
+  - name: Ensure group "sonar" exists
+    ansible.builtin.group:
+      name: sonar
+      state: present
+
+  - name: Create a user 'sonar' without a home directory
+    ansible.builtin.user:
+      name: sonar
+      group: sonar
+      create_home: no
+
+  - name: Change /opt/sonarqube ownership and group
+    ansible.builtin.file:
+      path: /opt/sonarqube
+      owner: sonar
+      group: sonar
+      recurse: yes
+
+  - name: Insert postgresql configuration in /opt/sonarqube/conf/sonar.properties
+    ansible.builtin.blockinfile:
+      path: /opt/sonarqube/conf/sonar.properties
+      block: |
+        sonar.jdbc.username={{ db_user }}
+        sonar.jdbc.password={{ db_password }}
+        sonar.jdbc.url=jdbc:postgresql://localhost:5432/{{ db_name }}
+
+  - name: Create sonarqube systemd service
+    ansible.builtin.copy:
+      dest: /etc/systemd/system/sonarqube.service
+      content: |
+        [Unit]
+        Description=SonarQube service
+        After=syslog.target network.target
+
+        [Service]
+        Type=forking
+
+        ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
+        ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
+
+        User=sonar
+        Group=sonar
+        Restart=always
+
+        LimitNOFILE=131072
+        LimitNPROC=8192
+
+        [Install]
+        WantedBy=multi-user.target
+
+  - name: enable and start sonarqube
+    ansible.builtin.service:
+      name: sonarqube
+      enabled: true
+      state: started
+
