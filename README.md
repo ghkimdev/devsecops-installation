@@ -45,8 +45,8 @@ cd devsecops-installation/install
 ```
 ```
 # 설치파일 실행
-./install_terraform.sh
 ./install_ansible.sh
+./install_terraform.sh
 ./install_awscli.sh
 ./install_helm.sh
 ./install_kubectl.sh
