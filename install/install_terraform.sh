@@ -9,4 +9,4 @@ https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
 sudo tee /etc/apt/sources.list.d/hashicorp.list
 sudo apt update && sudo apt-get install -y terraform
 
-cp -r /opt/install/terraform /opt/terraform
+cp -r /opt/devsecops-installation/install/terraform /opt/terraform
