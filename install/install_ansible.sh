@@ -2,7 +2,7 @@
 
 ssh-keygen -t rsa -b 3072 -f ~/.ssh/id_rsa -N ""
 
-sudo apt update -qq
+sudo apt update
 sudo apt install -y python3 python3-pip
 
 pip3 install ansible boto3 botocore
