@@ -1,5 +1,8 @@
 - name: Install JAVA
-  hosts: all
+  hosts: 
+  - jenkins
+  - nexus
+  - sonarqube
   become: true
 
   tasks:
