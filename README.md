@@ -1,7 +1,7 @@
 
 # DevSecOps Infrastructure 설정
 
-이 저장소는 Terraform과 Ansible을 사용하여 DevSecOps 인프라를 구축하는 가이드를 제공합니다. Terraform으로 AWS의 VPC, EC2, ECR, S3, EKS를 생성하고, Ansible로 각 EC2에 Jenkins와 Nexus, SonarQube를 설치해 SSL을 적용합니다. 그리고 EKS에는 helm을 이용해 ArgoCD, Ingress-Nginx, Cert-Manager이 설치됩니다.
+이 저장소는 Terraform과 Ansible을 사용하여 DevSecOps 인프라를 구축하는 가이드를 제공합니다. Terraform으로 AWS의 VPC, EC2, ECR, S3, EKS를 생성하고, Ansible로 각 EC2에 Jenkins와 Nexus, SonarQube를 설치해 SSL을 적용합니다. 그리고 EKS에는 helm을 이용해 ArgoCD, Ingress-Nginx, Cert-Manager를 설치합니다.
 
 
 ## 사전 요구사항
@@ -22,7 +22,7 @@
 3. 생성된 EC2에 간단한 설정을 합니다
 ```bash
 # 설치할 디렉토리 퍼미션 변경
-sudo chuown -R ubuntu:ubuntu /opt
+sudo chown -R ubuntu:ubuntu /opt
 
 # Ansible SSH HostKeyChecking 해제
 sudo sed -i 's/#   StrictHostKeyChecking ask/    StrictHostKeyChecking no/g' /etc/ssh/ssh_config
@@ -124,7 +124,7 @@ kubectl patch svc my-argo-cd-argocd-server -n argocd -p '{"spec": {"type": "Load
 
 13. ArgoCD Ingress 등록
 ```bash
-kubectl apply -f /opt/devsecops-installation/install/yamlletsencrypt-prod.yaml
+kubectl apply -f /opt/devsecops-installation/install/yaml/letsencrypt-prod.yaml
 kubectl apply -f /opt/devsecops-installation/install/yaml/argocd-ingress.yaml
 ```
 14. ArgoCD
