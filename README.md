@@ -67,7 +67,7 @@ aws configure
 6. Terraform으로 AWS 리소스를 생성합니다.
 ```bash
 # Terraform 실행 
-cd terraform
+cd /opt/devsecops-installation/install/terraform
 terraform init
 terraform plan
 terraform apply
@@ -84,7 +84,7 @@ terraform apply
 8. Ansible로 Jenkins, Nexus, Sonarqube를 설치하고 ssl 적용합니다.
 ```bash
 # Ansible 실행 
-cd /opt/ansible
+cd /opt/devsecops-installation/install/ansible
 ansible-playbook -i /opt/ansible/aws_ec2.yml -u ubuntu --vault-password-file /opt/ansible/ansible_vault_password playbook/master-playbook.yml 
 ```
 
