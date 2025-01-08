@@ -10,9 +10,3 @@ pip3 install ansible boto3 botocore
 cat <<EOF | sudo tee -a ~/.bashrc
 export ANSIBLE_CONFIG=/opt/ansible/ansible.cfg
 EOF
-
-sudo chown -R $(id -u):$(id -g) /opt
-cp -r /opt/devsecops-installation/install/ansible /opt/ansible
-
-
-
