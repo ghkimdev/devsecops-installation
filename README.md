@@ -70,6 +70,7 @@ terraform apply
 ```
 
 7. Terraform으로 생성된 EC2 Pulbic IP를 도메인 사이트에 가서 DNS 등록합니다.
+
 |Type|Name|Data|TTL|
 | --- | --- | --- | --- | 
 | A | jenkins | xx.xx.xx.xx | 600 seconds |
@@ -116,6 +117,7 @@ kubectl patch svc my-argo-cd-argocd-server -n argocd -p '{"spec": {"type": "Load
 ```
 
 12. ArgoCD DNS 등록
+
 |Type|Name|Data|TTL|
 | --- | --- | --- | --- | 
 | CNAME | argocd | xx.xx.xx.xx | 600 seconds |
