@@ -59,6 +59,10 @@ cd devsecops-installation/install
 # aws configure 적용
 aws configure 
 ```
+AWS Access Key ID [None]: XXXXXXX
+AWS Secret Access Key [None]: XXXXXXXXX
+Default region name [None]: ap-northeast-2
+Default output format [None]: json
 
 6. Terraform으로 AWS 리소스를 생성합니다.
 ```bash
