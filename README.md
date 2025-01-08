@@ -85,7 +85,7 @@ terraform apply
 ```bash
 # Ansible 실행 
 cd /opt/devsecops-installation/install/ansible
-ansible-playbook -i /opt/ansible/aws_ec2.yml -u ubuntu --vault-password-file /opt/ansible/ansible_vault_password playbook/master-playbook.yml 
+ansible-playbook -i /opt/devsecops-installation/install/ansible/aws_ec2.yml -u ubuntu --vault-password-file /opt/devsecops-installation/install/ansible/ansible_vault_password playbook/master-playbook.yml 
 ```
 
 9. Terraform으로 설치된 EKS 클러스터의 kubeconfig를 가져옵니다.
