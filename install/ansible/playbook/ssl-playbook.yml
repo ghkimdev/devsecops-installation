@@ -128,7 +128,7 @@
       when: inventory_hostname in ['jenkins', 'nexus', 'sonarqube']
 
     - name: Obtain SSL certificate for Jenkins domain
-      command: certbot --nginx -d {{ jenkins_domain }} --staging --non-interactive --agree-tos --email {{ email }}
+      command: certbot --nginx -d {{ jenkins_domain }} --non-interactive --agree-tos --email {{ email }}
       register: certbot_result
       failed_when: "'Congratulations' not in certbot_result.stdout"
       retries: 3
@@ -136,7 +136,7 @@
       when: inventory_hostname == 'jenkins'
 
     - name: Obtain SSL certificate for Nexus domain
-      command: certbot --nginx -d {{ nexus_domain }} --staging --non-interactive --agree-tos --email {{ email }}
+      command: certbot --nginx -d {{ nexus_domain }} --non-interactive --agree-tos --email {{ email }}
       register: certbot_result
       failed_when: "'Congratulations' not in certbot_result.stdout"
       retries: 3
@@ -144,7 +144,7 @@
       when: inventory_hostname == 'nexus'
 
     - name: Obtain SSL certificate for SonarQube domain
-      command: certbot --nginx -d {{ sonarqube_domain }} --staging --non-interactive --agree-tos --email {{ email }}
+      command: certbot --nginx -d {{ sonarqube_domain }} --non-interactive --agree-tos --email {{ email }}
       register: certbot_result
       failed_when: "'Congratulations' not in certbot_result.stdout"
       retries: 3
