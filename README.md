@@ -29,6 +29,10 @@ sudo sed -i 's/#   StrictHostKeyChecking ask/    StrictHostKeyChecking no/g' /et
 
 # SSHD 재실행
 sudo systemctl restart sshd
+
+# Ansible 설치경로 PATH 추가
+mkdir -p ~/.local/bin
+source ~/.profile
 ```
 
 4. DevSecOps를 구축하기 위한 도구를 설치합니다.
