@@ -46,11 +46,17 @@ cd devsecops-installation/install
 ```
 # 설치파일 실행
 ./install_ansible.sh
+
 ./install_terraform.sh
+
 ./install_awscli.sh
+
 ./install_helm.sh
+
 ./install_kubectl.sh
+
 ./install_eksctl.sh
+
 ./install_argocd.sh
 ```
 
@@ -99,17 +105,20 @@ aws eks update-kubeconfig --region ap-northeast-2 --name example
 # ArgoCD Helm Repo 추가
 helm repo add argo https://argoproj.github.io/argo-helm
 
-# ArgoCD 설치
-helm install my-argo-cd argo/argo-cd --version 7.7.14 -n argocd --create-namespace
-
 # Ingress Nginx Helm Repo 추가
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 
-# Ingress Nginx 설치
-helm install my-ingress-nginx ingress-nginx/ingress-nginx --version 4.12.0 -n ingress-nginx --create-namespace
-
 # Cert Manager Helm Repo 추가
 helm repo add cert-manager https://charts.jetstack.io
+
+# helm 저장소 업데이트
+helm repo update
+
+# ArgoCD 설치
+helm install my-argo-cd argo/argo-cd --version 7.7.14 -n argocd --create-namespace
+
+# Ingress Nginx 설치
+helm install my-ingress-nginx ingress-nginx/ingress-nginx --version 4.12.0 -n ingress-nginx --create-namespace
 
 # Cert Manager 설치
 helm install my-cert-manager cert-manager/cert-manager --version 1.16.2 -n cert-manager --create-namespace --set installCRDs=true
