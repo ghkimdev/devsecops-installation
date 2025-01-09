@@ -156,10 +156,10 @@ argocd account update-password
 
 
 ## 결론
-![Jenkins](images/jenkins.png)
+![Jenkins](jenkins.png)
 
-![Nexus](images/nexus.png)
+![Nexus](nexus.png)
 
-![Sonarqube](images/sonarqube.png)
+![Sonarqube](sonarqube.png)
 
-![ArgoCD](images/argocd.png)
+![ArgoCD](argocd.png)
