@@ -22,3 +22,6 @@ output "eks_cluster_name" {
   value = aws_eks_cluster.example.name
 }
 
+output "ecr_repository_url" {
+  value = aws_ecr_repository.petclinic.repository_url
+}
