@@ -125,19 +125,20 @@ helm install my-argo-cd argo/argo-cd --version 7.7.14 -n argocd --create-namespa
 helm install my-ingress-nginx ingress-nginx/ingress-nginx --version 4.12.0 -n ingress-nginx --create-namespace
 
 # Cert Manager 설치
-helm install my-cert-manager cert-manager/cert-manager --version 1.16.2 -n cert-manager --create-namespace --set installCRDs=true
+helm install my-cert-manager cert-manager/cert-manager --version 1.16.2 -n cert-manager --create-namespace --set crds.enabled=true
 ```
 
 11. ArgoCD Service Type 변경
 ```bash
-kubectl patch svc my-argo-cd-argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}' 
+kubectl patch svc my-argo-cd-argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+kubectl get svc -n argocd
 ```
 
 12. ArgoCD DNS 등록
 
 |Type|Name|Data|TTL|
 | --- | --- | --- | --- | 
-| CNAME | argocd | xx.xx.xx.xx | 600 seconds |
+| CNAME | argocd | xxxx.ap-northeast-2.elb.amazonaws.com. | 600 seconds |
 
 13. ArgoCD Ingress 등록
 ```bash
@@ -146,6 +147,19 @@ kubectl apply -f /opt/devsecops-installation/install/yaml/argocd-ingress.yaml
 ```
 14. ArgoCD
 ```bash
+# ArgoCD Password 확인
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
 argocd login argocd.gh-devops.site
 argocd account update-password
 ```
+
+
+## 결론
+![Jenkins](images/jenkins.png)
+
+![Nexus](images/nexus.png)
+
+![Sonarqube](images/sonarqube.png)
+
+![ArgoCD](images/argocd.png)
