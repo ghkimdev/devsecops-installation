@@ -145,7 +145,7 @@ kubectl get svc -n argocd
 kubectl apply -f /opt/devsecops-installation/install/yaml/letsencrypt-prod.yaml
 kubectl apply -f /opt/devsecops-installation/install/yaml/argocd-ingress.yaml
 ```
-14. ArgoCD
+14. ArgoCD CLI 로그인 & 패스워드 변경
 ```bash
 # ArgoCD Password 확인
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
